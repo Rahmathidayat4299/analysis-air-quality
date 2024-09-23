@@ -1,2 +1,5 @@
 streamlit
-matplotlib==3.6.1
+pandas
+matplotlib
+seaborn
+babel
