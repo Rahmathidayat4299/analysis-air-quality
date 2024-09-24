@@ -45,23 +45,28 @@ ax.legend()
 
 # Display the plot in Streamlit
 st.pyplot(fig)
-##answer number 2
 # Ensure SO2 is numeric
-st.header("Pertanyaan 2:Pertanyaan: Apa distribusi konsentrasi SO2 dan bagaimana nilai-nilai ekstrimnya?")
+st.header("Pertanyaan 2: Apa distribusi konsentrasi SO2 dan bagaimana nilai-nilai ekstrimnya?")
 all_df['SO2'] = pd.to_numeric(all_df['SO2'], errors='coerce')
 
 # Drop rows where SO2 is NaN
 all_df.dropna(subset=['SO2'], inplace=True)
 
 # Check if year, month, day, hour columns exist for datetime creation
-if all_df[['year', 'month', 'day', 'hour']].notnull().all().all():
-    # Create datetime column
-    all_df['datetime'] = pd.to_datetime(all_df[['year', 'month', 'day', 'hour']])
+required_columns = ['year', 'month', 'day', 'hour']
+if all(col in all_df.columns for col in required_columns):
+    try:
+        # Create datetime column
+        all_df['datetime'] = pd.to_datetime(all_df[['year', 'month', 'day', 'hour']], errors='coerce')
+        all_df.dropna(subset=['datetime'], inplace=True)  # Drop rows with NaT
+    except Exception as e:
+        st.error(f"Error creating datetime: {e}")
 else:
     st.error("Year, month, day, and hour columns are required for datetime creation.")
 
-# Set datetime as index
-all_df.set_index('datetime', inplace=True)
+# Set datetime as index if available
+if 'datetime' in all_df.columns:
+    all_df.set_index('datetime', inplace=True)
 
 # Create a histogram for SO2 distribution
 st.write("# Distribusi Konsentrasi SO2")
@@ -84,6 +89,7 @@ if not extreme_so2.empty:
     st.dataframe(extreme_so2)
 else:
     st.write("Tidak ada nilai ekstrim SO2 yang ditemukan.")
+
 ######
 ##pertanyaan 3
 st.header("Pertanyaan3:Apakah ada hubungan antara konsentrasi CO dan PM10?")
