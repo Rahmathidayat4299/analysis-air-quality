@@ -32,7 +32,7 @@ all_df['PM2.5'] = pd.to_numeric(all_df['PM2.5'], errors='coerce')
 all_df.dropna(subset=['PM2.5'], inplace=True)
 
 # Calculate monthly average of PM2.5
-monthly_pm25 = all_df['PM2.5'].resample('M').mean()
+monthly_pm25 = all_df['PM2.5'].resample('ME').mean()
 
 # Display the title in Streamlit
 st.write("# Rata-rata Bulanan PM2.5")
