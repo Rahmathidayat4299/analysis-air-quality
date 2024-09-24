@@ -47,7 +47,7 @@ ax.legend()
 st.pyplot(fig)
 ##answer number 2
 # Ensure SO2 is numeric
-st.header("Pertanyaan 2:Pertanyaan: Apa distribusi konsentrasi SO2 dan bagaimana nilai-nilai ekstrimnya?")
+st.header("Pertanyaan 2:Apa distribusi konsentrasi SO2 dan bagaimana nilai-nilai ekstrimnya?")
 all_df['SO2'] = pd.to_numeric(all_df['SO2'], errors='coerce')
 
 # Drop rows where SO2 is NaN
