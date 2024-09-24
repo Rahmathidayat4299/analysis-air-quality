@@ -47,7 +47,7 @@ ax.legend()
 st.pyplot(fig)
 ##answer number 2
 # Ensure SO2 is numeric
-st.header("Pertanyaan 2:Apa distribusi konsentrasi SO2 dan bagaimana nilai-nilai ekstrimnya?")
+st.header("Pertanyaan 2:Pertanyaan: Apa distribusi konsentrasi SO2 dan bagaimana nilai-nilai ekstrimnya?")
 all_df['SO2'] = pd.to_numeric(all_df['SO2'], errors='coerce')
 
 # Drop rows where SO2 is NaN
@@ -86,7 +86,7 @@ else:
     st.write("Tidak ada nilai ekstrim SO2 yang ditemukan.")
 ######
 ##pertanyaan 3
-st.header("Pertanyaan3: Apakah ada hubungan antara konsentrasi CO dan PM10?")
+st.header("Pertanyaan3:Apakah ada hubungan antara konsentrasi CO dan PM10?")
 # Ensure CO and PM10 columns are numeric
 all_df['CO'] = pd.to_numeric(all_df['CO'], errors='coerce')
 all_df['PM10'] = pd.to_numeric(all_df['PM10'], errors='coerce')
