@@ -28,7 +28,7 @@ def preprocess_data(df):
 
 def plot_monthly_pm25(df):
     """Plot the monthly average of PM2.5 concentration."""
-    monthly_pm25 = df['PM2.5'].resample('ME').mean()
+    monthly_pm25 = df['PM2.5'].resample('M').mean()
     fig, ax = plt.subplots(figsize=(15, 6))
     monthly_pm25.plot(ax=ax, color='b', marker='o')
     ax.set_title('Rata-rata Bulanan PM2.5')
