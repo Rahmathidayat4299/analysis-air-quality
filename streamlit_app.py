@@ -40,25 +40,37 @@ def preprocess_data(df):
     return df
 
 def plot_monthly_pm25(df):
-    """Plot the monthly average of PM2.5 concentration."""
+    """Plot the monthly average of PM2.5 concentration with station selection."""
     if df.empty or 'PM2.5' not in df.columns:
         st.warning("Data tidak tersedia untuk plot PM2.5.")
         return
     
-    if not pd.api.types.is_datetime64_any_dtype(df.index):
+    # Pilihan stasiun
+    available_stations = df['station'].unique().tolist()
+    selected_stations = st.multiselect("Pilih stasiun untuk analisis PM2.5:", available_stations, default=available_stations[:2])
+    
+    # Filter data berdasarkan pilihan stasiun
+    df_filtered = df[df['station'].isin(selected_stations)]
+    
+    if df_filtered.empty:
+        st.warning("Tidak ada data yang sesuai dengan stasiun yang dipilih.")
+        return
+
+    # Pastikan indeks datetime untuk resampling
+    if not pd.api.types.is_datetime64_any_dtype(df_filtered.index):
         st.warning("Indeks DataFrame bukan tipe datetime, tidak bisa melakukan resampling.")
         return
-    
-    monthly_pm25 = df['PM2.5'].resample('M').mean()
+
+    monthly_pm25 = df_filtered['PM2.5'].resample('M').mean()
     fig, ax = plt.subplots(figsize=(15, 6))
     monthly_pm25.plot(ax=ax, color='b', marker='o')
-    ax.set_title('Rata-rata Bulanan PM2.5')
+    ax.set_title(f'Rata-rata Bulanan PM2.5 untuk {", ".join(selected_stations)}')
     ax.set_xlabel('Tanggal')
     ax.set_ylabel('Konsentrasi PM2.5 (µg/m³)')
     ax.axhline(y=75, color='r', linestyle='--', label='Ambang Batas (75 µg/m³)')
     ax.legend()
     st.pyplot(fig)
-
+    
 def plot_so2_distribution(df):
     """Plot the distribution of SO2 concentration."""
     if df.empty or 'SO2' not in df.columns:
@@ -110,32 +122,36 @@ def main():
     all_df = preprocess_data(all_df)
     if all_df.empty:
         st.stop()
+   
+    st.header("1️⃣ Hitung Hari PM2.5 Melebihi Ambang Batas")
+    
+    city_options = sorted(all_df['station'].unique().tolist())
+    
+    # Modify the default selection to prioritize Dingling
+    default_options = ['Dingling'] + [city for city in ['Changping'] if city in city_options and city != 'Dingling']
+    default_options = [city for city in default_options if city in city_options]
+    
+    selected_cities = st.multiselect("Pilih kota:", city_options, default=default_options)
+    start_date = st.date_input("Pilih tanggal mulai:", value=pd.to_datetime("2016-01-01").date())
+    end_date = st.date_input("Pilih tanggal akhir:", value=pd.to_datetime("2017-12-31").date())
+    if start_date > end_date:
+        st.error("Tanggal mulai harus lebih awal dari tanggal akhir!")
+    elif selected_cities:
+        count_exceeding_pm25(all_df, selected_cities, pd.to_datetime(start_date), pd.to_datetime(end_date))
     
     st.write("### Statistik Data")
     st.dataframe(all_df.describe())
-    
-    st.header("1️⃣ Tren Bulanan Rata-rata Konsentrasi PM2.5")
-    plot_monthly_pm25(all_df)
-    
+
     st.header("2️⃣ Distribusi Konsentrasi SO2 dan Nilai Ekstrim")
     plot_so2_distribution(all_df)
     
     st.header("3️⃣ Hubungan antara Konsentrasi CO dan PM10")
     plot_co_pm10_relationship(all_df)
     
-    st.header("4️⃣ Hitung Hari PM2.5 Melebihi Ambang Batas")
+    st.header("4️⃣ Tren Bulanan Rata-rata Konsentrasi PM2.5")
+    plot_monthly_pm25(all_df)
+ 
     
-    city_options = sorted(all_df['station'].unique().tolist())
-    default_options = [city for city in ['Dingling', 'Changping'] if city in city_options]
     
-    selected_cities = st.multiselect("Pilih kota:", city_options, default=default_options)
-    start_date = st.date_input("Pilih tanggal mulai:", value=pd.to_datetime("2016-01-01").date())
-    end_date = st.date_input("Pilih tanggal akhir:", value=pd.to_datetime("2017-12-31").date())
-    
-    if start_date > end_date:
-        st.error("Tanggal mulai harus lebih awal dari tanggal akhir!")
-    elif selected_cities:
-        count_exceeding_pm25(all_df, selected_cities, pd.to_datetime(start_date), pd.to_datetime(end_date))
-
 if __name__ == "__main__":
     main()
